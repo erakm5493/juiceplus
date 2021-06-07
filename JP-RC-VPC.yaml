@@ -1,0 +1,752 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: 
+  VPC with Public and Private Subnets in Oregaon Region.
+
+Parameters:
+  VpcCIDR:
+    Description: Please Enter the IP range for the VPC
+    Type: String
+    Default: 10.54.0.0/16
+
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.54.32.0/20
+
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range for the public subnet in the second Availability Zone
+    Type: String
+    Default: 10.54.96.0/20
+
+  PublicSubnet3CIDR:
+    Description: Please enter the IP range for the public subnet in the third Availability Zone
+    Type: String
+    Default: 10.54.160.0/20
+
+  PublicSubnet4CIDR:
+    Description: Please enter the IP range for the public subnet in the fourth Availability Zone
+    Type: String
+    Default: 10.54.224.0/20
+
+# Private Subnets for AZ-1.
+
+  PrivateSubnet1CIDR:
+    Description: Please enter the IP range for the private subnet A in the first Availability Zone
+    Type: String
+    Default: 10.54.0.0/19 
+  
+  PrivateSubnet2CIDR:
+    Description: Please enter the IP range for the private subnet B in the first Availability Zone
+    Type: String
+    Default: 10.54.48.0/21
+
+  PrivateSubnet3CIDR:
+    Description: Please enter the IP range for the spare subnet in the first Availability Zone
+    Type: String
+    Default: 10.54.56.0/21
+
+# Private Subnets for AZ-2.
+
+  PrivateSubnet4CIDR:
+    Description: Please enter the IP range for the private subnet A in the second Availability Zone
+    Type: String
+    Default: 10.54.64.0/19 
+  
+  PrivateSubnet5CIDR:
+    Description: Please enter the IP range for the private subnet B in the second Availability Zone
+    Type: String
+    Default: 10.54.112.0/21
+
+  PrivateSubnet6CIDR:
+    Description: Please enter the IP range for the spare subnet in the second Availability Zone
+    Type: String
+    Default: 10.54.120.0/21
+
+# Private Subnets for AZ-3.
+
+  PrivateSubnet7CIDR:
+    Description: Please enter the IP range for the private subnet A in the third Availability Zone
+    Type: String
+    Default: 10.54.128.0/19  
+  
+  PrivateSubnet8CIDR:
+    Description: Please enter the IP range for the private subnet B in the third Availability Zone
+    Type: String
+    Default: 10.54.176.0/21
+
+  PrivateSubnet9CIDR:
+    Description: Please enter the IP range for the spare subnet in the third Availability Zone
+    Type: String
+    Default: 10.54.184.0/21
+
+# Private Subnets for AZ-4.
+
+  PrivateSubnet10CIDR:
+    Description: Please enter the IP range for the private subnet A in the fourth Availability Zone
+    Type: String
+    Default: 10.54.192.0/19 
+  
+  PrivateSubnet11CIDR:
+    Description: Please enter the IP range for the private subnet B in the fourth Availability Zone
+    Type: String
+    Default: 10.54.240.0/21
+
+  PrivateSubnet12CIDR:
+    Description: Please enter the IP range for the spare subnet in the fourth Availability Zone
+    Type: String
+    Default: 10.54.248.0/21
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: 
+       - Key: Name
+         Value: jp-vpc
+       - Key: Application
+         Value: !Ref 'AWS::StackName'
+    
+# Create IGW
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: 
+        - Key: Name
+          Value: jp-igw
+
+  # Attaching IGW to VPC
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+
+  # Create Public Subnet
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-az1
+    
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-az2
+
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2c"
+      CidrBlock: !Ref PublicSubnet3CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-az3
+    
+  PublicSubnet4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2d"
+      CidrBlock: !Ref PublicSubnet4CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-az4
+
+  # Create  Private Subnet for Az1
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: private-subnet-A-AZ1
+    
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet B (AZ1)
+    
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2a"
+      CidrBlock: !Ref PrivateSubnet3CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Spare Subnet (AZ1)
+
+
+# Create  Private Subnet for Az2
+
+  PrivateSubnet4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: !Ref PrivateSubnet4CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet A (AZ2)
+    
+  PrivateSubnet5:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: !Ref PrivateSubnet5CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet B (AZ2)
+    
+  PrivateSubnet6:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2b"
+      CidrBlock: !Ref PrivateSubnet6CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Spare Subnet (AZ2)
+
+# Create  Private Subnet for Az3
+
+  PrivateSubnet7:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2c"
+      CidrBlock: !Ref PrivateSubnet7CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet A (AZ3)
+    
+  PrivateSubnet8:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2c"
+      CidrBlock: !Ref PrivateSubnet8CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet B (AZ3)
+    
+  PrivateSubnet9:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2c"
+      CidrBlock: !Ref PrivateSubnet9CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Spare Subnet (AZ3)
+
+# Create  Private Subnet for Az4
+
+  PrivateSubnet10:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2d"
+      CidrBlock: !Ref PrivateSubnet10CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet A (AZ4)
+    
+  PrivateSubnet11:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2d"
+      CidrBlock: !Ref PrivateSubnet11CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Private Subnet B (AZ4)
+    
+  PrivateSubnet12:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: "us-west-2d"
+      CidrBlock: !Ref PrivateSubnet12CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: Spare Subnet (AZ4)
+
+# Creating NAT Gateways in Public Subnets.
+
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  
+  NatGateway3EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway4EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet2
+
+  NatGateway3:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway3EIP.AllocationId
+      SubnetId: !Ref PublicSubnet3
+
+  NatGateway4:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway4EIP.AllocationId
+      SubnetId: !Ref PublicSubnet4
+
+# create Public Route Table
+  
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public Route Table
+    
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+  
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet3
+
+  PublicSubnet4RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet4
+
+#  Create Private Route Table for AZ-1
+
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Private Routes (AZ1)
+
+  DefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+  
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet2
+  
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet3
+
+#  Create Private Route Table for AZ-2
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Private Routes (AZ2)
+
+  DefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+
+  PrivateSubnet4RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet4
+  
+  PrivateSubnet5RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet5
+  
+  PrivateSubnet6RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet6
+
+#  Create Private Route Table for AZ-3
+
+  PrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Private Routes (AZ3)
+
+  DefaultPrivateRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
+
+  PrivateSubnet7RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet7
+  
+  PrivateSubnet8RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet8
+  
+  PrivateSubnet9RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet9
+
+#  Create Private Route Table for AZ-4
+
+  PrivateRouteTable4:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Private Routes (AZ4)
+
+  DefaultPrivateRoute4:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable4
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway4
+
+  PrivateSubnet10RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable4
+      SubnetId: !Ref PrivateSubnet10
+  
+  PrivateSubnet11RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable4
+      SubnetId: !Ref PrivateSubnet11
+  
+  PrivateSubnet12RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable4
+      SubnetId: !Ref PrivateSubnet12
+      
+#  Create Security Group 
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      VpcId:
+         Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+#NACL for Public Subnets 
+
+  PublicNacl:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: JP-Public-NACL
+  
+  PublicNaclRulesForInboundTCP: #Allows all Incoming TCP traffic
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNacl
+      RuleNumber: '100'
+      Protocol: '6'  
+      RuleAction: allow
+      Egress: 'false'  
+      CidrBlock: 0.0.0.0/0  # any ip address
+      PortRange:
+        From: '0'
+        To: '65535'
+  
+  PublicNaclRulesForOutboundTCP: # Allows All outbound TCP traffic
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNacl
+      RuleNumber: '110'
+      Protocol: '6'  
+      RuleAction: allow
+      Egress: 'true'  
+      CidrBlock: 0.0.0.0/0 # any ip address
+      PortRange:
+        From: '0'  
+        To: '65535'
+
+  PublicSubnetNaclAssociation1: # NACL association to Public Subnet in AZ1
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      NetworkAclId: !Ref PublicNacl
+
+  PublicSubnetNaclAssociation2: # NACL association to Public Subnet in AZ2
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      NetworkAclId: !Ref PublicNacl
+
+  PublicSubnetNaclAssociation3: # NACL association to Public Subnet in AZ3
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      NetworkAclId: !Ref PublicNacl
+
+  PublicSubnetNaclAssociation4: # NACL association to Public Subnet in AZ4
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet4
+      NetworkAclId: !Ref PublicNacl
+
+  PrivateNacl: #Private NACL
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: JP-Private-NACL
+  
+  PrivateNaclRulesForTCP: #Deny all TCP traffic- Ingress and Egress both.
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PrivateNacl
+      RuleNumber: '100'
+      Protocol: '6'  
+      RuleAction: 'deny'
+      Egress: 'true'  
+      CidrBlock: 0.0.0.0/0  # any ip address
+      PortRange:
+        From: '0'
+        To: '65535'
+
+# NACL Association to all private Subnet in AZ1
+  PrivateSubnetNaclAssociation1: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      NetworkAclId: !Ref PrivateNacl  
+
+  PrivateSubnetNaclAssociation2: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      NetworkAclId: !Ref PrivateNacl 
+
+  PrivateSubnetNaclAssociation3: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet3
+      NetworkAclId: !Ref PrivateNacl 
+
+# NACL Association to all private Subnet in AZ2
+  PrivateSubnetNaclAssociation4: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet4
+      NetworkAclId: !Ref PrivateNacl  
+
+  PrivateSubnetNaclAssociation5: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet5
+      NetworkAclId: !Ref PrivateNacl 
+
+  PrivateSubnetNaclAssociation6: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet6
+      NetworkAclId: !Ref PrivateNacl 
+
+# NACL Association to all private Subnet in AZ3
+  PrivateSubnetNaclAssociation7: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet7
+      NetworkAclId: !Ref PrivateNacl  
+
+  PrivateSubnetNaclAssociation8: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet8
+      NetworkAclId: !Ref PrivateNacl 
+
+  PrivateSubnetNaclAssociation9: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet9
+      NetworkAclId: !Ref PrivateNacl 
+
+# NACL Association to all private Subnet in AZ4
+  PrivateSubnetNaclAssociation10: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet10
+      NetworkAclId: !Ref PrivateNacl  
+
+  PrivateSubnetNaclAssociation11: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet11
+      NetworkAclId: !Ref PrivateNacl 
+
+  PrivateSubnetNaclAssociation12: 
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet12
+      NetworkAclId: !Ref PrivateNacl 
+#Output
+
+Outputs:
+  VpcID:
+    Description: ID of the newly created VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCID" # the name for cross referencing
+
+  PublicSubnetID:
+    Description: SubnetId of the public subnet
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-SUBNET"
+   
+  PublicSubnetID:
+    Description: SubnetId of the public subnet
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-SUBNET"
+     
+  PublicSubnetID:
+    Description: SubnetId of the public subnet
+    Value: !Ref PublicSubnet3
+    Export:
+      Name: !Sub "${AWS::StackName}-SUBNET"
+      
+  PublicSubnetID:
+    Description: SubnetId of the public subnet
+    Value: !Ref PublicSubnet4
+    Export:
+      Name: !Sub "${AWS::StackName}-SUBNET"
+
